@@ -144,6 +144,14 @@ public class ScriptedMetricAggregatorTests extends AggregatorTestCase {
         "initScriptMakingArray",
         Collections.emptyMap()
     );
+    
+    /* empty initscript */
+    private static final Script INIT_SCRIPT_EMPTY = new Script(
+        ScriptType.INLINE,
+        MockScriptEngine.NAME,
+        "initScriptEmpty",
+        Collections.emptyMap()
+    );
 
     private static final Map<String, Function<Map<String, Object>, Object>> SCRIPTS = new HashMap<>();
 
@@ -235,6 +243,11 @@ public class ScriptedMetricAggregatorTests extends AggregatorTestCase {
             Map<String, Object> state = (Map<String, Object>) params.get("state");
             state.put("array", new String[] { "foo", "bar" });
             state.put("collector", new ArrayList<Integer>());
+            return state;
+        });
+        /* empty initscript */
+        SCRIPTS.put("initScriptEmpty", params -> {
+            Map<String, Object> state = new HashMap<>();
             return state;
         });
     }
@@ -336,6 +349,27 @@ public class ScriptedMetricAggregatorTests extends AggregatorTestCase {
                     () -> searchAndReduce(newSearcher(indexReader, true, true), new MatchAllDocsQuery(), aggregationBuilder)
                 );
                 assertEquals(exception.getMessage(), "[reduceScript] must not be null: [scriptedMetric]");
+            }
+        }
+    }
+    
+    /* empty initscript */
+    public void testScriptedMetricWithEmptyInitial() throws IOException {
+        try (Directory directory = newDirectory()) {
+            int numDocs = randomInt(100);
+            try (RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory)) {
+                for (int i = 0; i < numDocs; i++) {
+                 // intentionally not writing any docs
+                }
+            }
+            try (IndexReader indexReader = DirectoryReader.open(directory)) {
+                ScriptedMetricAggregationBuilder aggregationBuilder = new ScriptedMetricAggregationBuilder(AGG_NAME);
+                aggregationBuilder.initScript(INIT_SCRIPT_EMPTY).mapScript(MAP_SCRIPT).combineScript(COMBINE_SCRIPT);
+                IllegalArgumentException exception = expectThrows(
+                    IllegalArgumentException.class,
+                    () -> searchAndReduce(newSearcher(indexReader, true, true), new MatchAllDocsQuery(), aggregationBuilder)
+                );
+                assertEquals(exception.getMessage(), "[initScript] must not be empty: [scriptedMetric]");
             }
         }
     }
