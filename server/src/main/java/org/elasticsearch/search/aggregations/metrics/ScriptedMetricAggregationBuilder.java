@@ -119,6 +119,8 @@ public class ScriptedMetricAggregationBuilder extends AbstractAggregationBuilder
             throw new IllegalArgumentException("[initScript] must not be null: [" + name + "]");
         }
         
+        //CS427 issue link: https://github.com/elastic/elasticsearch/issues/60909
+        
         final Map<String, Object> initScriptParams = new ConcurrentHashMap<>(initScript.getParams());
         
         if (initScriptParams.isEmpty()) { 

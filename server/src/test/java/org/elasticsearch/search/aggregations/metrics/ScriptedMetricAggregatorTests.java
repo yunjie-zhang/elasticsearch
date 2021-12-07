@@ -145,6 +145,7 @@ public class ScriptedMetricAggregatorTests extends AggregatorTestCase {
         Collections.emptyMap()
     );
     
+    //CS427 issue link: https://github.com/elastic/elasticsearch/issues/60909
     /* empty initscript */
     private static final Script INIT_SCRIPT_EMPTY = new Script(
         ScriptType.INLINE,
@@ -245,6 +246,7 @@ public class ScriptedMetricAggregatorTests extends AggregatorTestCase {
             state.put("collector", new ArrayList<Integer>());
             return state;
         });
+        //CS427 issue link: https://github.com/elastic/elasticsearch/issues/60909
         /* empty initscript */
         SCRIPTS.put("initScriptEmpty", params -> {
             Map<String, Object> state = new HashMap<>();
@@ -353,6 +355,7 @@ public class ScriptedMetricAggregatorTests extends AggregatorTestCase {
         }
     }
     
+    //CS427 issue link: https://github.com/elastic/elasticsearch/issues/60909
     /* empty initscript */
     public void testScriptedMetricWithEmptyInitial() throws IOException {
         try (Directory directory = newDirectory()) {
